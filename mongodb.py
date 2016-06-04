@@ -3,13 +3,13 @@ from pymongo import MongoClient
 
 
 def get_db():
-    client = MongoClient('localhost', 27017)
+    client = MongoClient('52.208.8.144', 27017)
     ofertasdb = client.get_database('ofertas')
     db = ofertasdb['ofertas']
     return db
 
 
-def add_oferta(db, oferta):
+def add_update_oferta(db, oferta):
     db.save(oferta)
 
 
