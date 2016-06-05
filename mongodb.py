@@ -17,3 +17,7 @@ def get_oferta(db, query=None):
     if query is None:
         query = {}
     return db.find(query)
+
+
+def remove_oferta(db, id):
+    db.remove(id)
