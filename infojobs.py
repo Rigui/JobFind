@@ -51,6 +51,7 @@ def get_infojobs():
             oferta.salario_min = salary_min
             oferta.provincia = province
             oferta.requisitos = requirement_min
+            oferta.experiencia_min = experience
             ofertas.append(oferta.to_json())
 
         return ofertas

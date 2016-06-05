@@ -16,6 +16,7 @@ class Oferta:
         self.salario_min = None
         self.duracion = None
         self.requisitos = None
+        self.experiencia_min = None
 
     def to_json(self):
         oferta_json = {
@@ -34,6 +35,7 @@ class Oferta:
             "provincia": self.provincia,
             "salario_min": self.salario_min,
             "duracion": self.duracion,
-            "requisitos": self.requisitos
+            "requisitos": self.requisitos,
+            "experiencia_min" : self.experiencia_min
         }
         return oferta_json
