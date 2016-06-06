@@ -24,7 +24,7 @@ def get_infojobs():
         ofertas = []
         for offer in res_json["offers"]:
             province = __tokenization_and_stemmer(offer["province"]["value"].encode('utf-8'))
-            city = __tokenization_and_stemmer(offer["city"].encode('utf-8'))
+            city = offer["city"].lower().encode('utf-8')
             published_date = __tokenization_and_stemmer(offer["published"].encode('utf-8'))
             link = offer["link"]
             updated_date = __tokenization_and_stemmer(offer["updated"].encode('utf-8'))

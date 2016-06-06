@@ -55,7 +55,7 @@ def __scrapping_links(links):
                 elif "Fecha Fin Publicación".decode('utf-8') in div.getText():
                     fecha_fin_publicacion = div.find_all('div')[1].getText()
                 elif "Lugar de trabajo".decode('utf-8') in div.getText():
-                    city = __tokenization_and_stemmer(div.find_all('div')[1].getText().encode('utf-8'))
+                    city = div.find_all('div')[1].getText().lower().encode('utf-8')
                 elif "Jornada completa".decode('utf-8') in div.getText():
                     jornada_completa = div.find_all('div')[1].getText()
                 elif "Remuneración".decode('utf-8') in div.getText():
@@ -63,7 +63,7 @@ def __scrapping_links(links):
                 elif "Funciones".decode('utf-8') in div.getText():
                     funciones = div.find_all('div')[1].getText().encode('utf-8')
                     if "lugar de traballo" in funciones.lower():
-                        city = __tokenization_and_stemmer(str(funciones).lower().split("lugar de traballo: ")[1].split("\n")[0])
+                        city = str(funciones).lower().split("lugar de traballo: ")[1].split("\n")[0].lower()
                     if "REQ" in funciones and "RESE:" in funciones:
                         requirese = (str(funciones).lower().split("rese:")[1]).split("ofrécese")[0]
                         funciones = str(funciones).lower().replace(requirese, "")
