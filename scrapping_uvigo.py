@@ -89,6 +89,11 @@ def __scrapping_links(links):
                         conocimientos = str(conocimientos).lower().replace(
                             "competencias transversais" + competencias, "")
                         competencias = __tokenization_and_stemmer(competencias)
+                    elif "imprescindible" in conocimientos.lower() and \
+                                    "competencias transversais" not in str(conocimientos).lower():
+                        imprescindible = (str(conocimientos).lower().split("imprescindible")[1]).split("\n")[0]
+                        conocimientos = str(conocimientos).lower().replace("imprescindible", "").replace(imprescindible, "")
+                        imprescindible = __tokenization_and_stemmer(imprescindible)
                     conocimientos = __tokenization_and_stemmer(conocimientos)
                 elif "Destinatarios".decode('utf-8') in div.getText():
                     destinatarios = __tokenization_and_stemmer(div.find_all('div')[1].getText().encode('utf-8'))
