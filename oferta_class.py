@@ -25,7 +25,7 @@ class Oferta:
         oferta_json = {
             '_id': self._id,
             'ciudad': self.ciudad,
-            'titulo': self.titulo,
+            'titulo_oferta': self.titulo,
             'fecha_publicacion': self.fecha_publicacion,
             'titulacion': self.titulacion,
             'empresa': self.empresa,
