@@ -42,7 +42,7 @@ def __scrapping_links(links):
         status_code = req.status_code
         if status_code == 200:
             html = BeautifulSoup(req.text, "lxml")  # Pasamos el contenido HTML de la web a un objeto BeautifulSoup()
-            job_title = __tokenization_and_stemmer(html.find('div', {'id': 'contido'}).find('h1').getText())
+            job_title = html.find('div', {'id': 'contido'}).find('h1').getText()
             city = fecha_inicio_publicacion = destinatarios = empresa = remuneracion = numero_vacantes = duracion = None
             imprescindible = competencias = requirese = None
             for div in html.find_all('div', {'class': 'taboa_fila'}):
@@ -55,7 +55,7 @@ def __scrapping_links(links):
                 elif "Fecha Fin Publicación".decode('utf-8') in div.getText():
                     fecha_fin_publicacion = div.find_all('div')[1].getText()
                 elif "Lugar de trabajo".decode('utf-8') in div.getText():
-                    city = __tokenization_and_stemmer(div.find_all('div')[1].getText())
+                    city = div.find_all('div')[1].getText()
                 elif "Jornada completa".decode('utf-8') in div.getText():
                     jornada_completa = div.find_all('div')[1].getText()
                 elif "Remuneración".decode('utf-8') in div.getText():
@@ -74,7 +74,6 @@ def __scrapping_links(links):
                 elif "Conocimientos".decode('utf-8') in div.getText():
                     conocimientos = div.find_all('div')[1].getText().encode('utf-8')
                     if "imprescindible" in conocimientos.lower() and "competencias transversais" in conocimientos.lower():
-                        print url
                         imprescindible = \
                             (str(conocimientos).lower().split("imprescindible")[1]).split("competencias transversais")[0]
                         competencias = str(conocimientos).lower().split("competencias transversais")[1]
