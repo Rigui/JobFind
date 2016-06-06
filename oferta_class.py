@@ -9,6 +9,8 @@ class Oferta:
         self.nivel_titulacion = None
         self._id = self.url = url
         self.ciudad = ciudad
+        self.comunidad = None
+        self.pais = None
         self.titulo = titulo
         self.fecha_publicacion = fecha_publicacion
         self.titulacion = None
@@ -42,6 +44,8 @@ class Oferta:
             "experiencia_min" : self.experiencia_min,
             "imprescindible": self.imprescindible,
             "competencias": self.competencias,
-            "requirese": self.requirese
+            "requirese": self.requirese,
+            "comunidad": self.comunidad,
+            "pais": self.pais
         }
         return oferta_json
