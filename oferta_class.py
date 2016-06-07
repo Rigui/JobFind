@@ -23,6 +23,7 @@ class Oferta:
         self.competencias = None
         self.requirese = None
         self.nota_user = None
+        self.empresas_relacionadas = None
 
     def to_json(self):
         oferta_json = {
@@ -48,6 +49,7 @@ class Oferta:
             "requirese": self.requirese,
             "comunidad": self.comunidad,
             "pais": self.pais,
-            "nota_user": self.nota_user
+            "nota_user": self.nota_user,
+            "self.empresas_relacionadas": self.empresas_relacionadas
         }
         return oferta_json
