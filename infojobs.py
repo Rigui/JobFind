@@ -6,7 +6,6 @@ from nltk.tokenize import *
 
 def __tokenization_and_stemmer(line):
     tokenized_words = [PorterStemmer().stem(word) for word in word_tokenize(line.lower().decode('utf-8'), 'spanish')]
-    tokenized_words = tokenized_words.__str__()
     return tokenized_words
 
 
@@ -42,7 +41,7 @@ def get_infojobs():
             work_day = __tokenization_and_stemmer(offer["workDay"]["value"].encode('utf-8'))
             salary_period = __tokenization_and_stemmer(offer["salaryPeriod"]["value"].encode('utf-8'))
             requirement_min = __tokenization_and_stemmer(offer["requirementMin"].encode('utf-8'))
-            requirements = [line for line in requirement_min.split("\n")]
+            # requirements = [line for line in requirement_min.split("\n")]
 
             oferta = oferta_class.Oferta(link, city, job_title, published_date, author_name)
             oferta.nivel_titulacion = nivel_titulacion

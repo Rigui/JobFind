@@ -50,6 +50,6 @@ class Oferta:
             "comunidad": self.comunidad,
             "pais": self.pais,
             "nota_user": self.nota_user,
-            "self.empresas_relacionadas": self.empresas_relacionadas
+            "empresas_relacionadas": self.empresas_relacionadas
         }
         return oferta_json

@@ -17,7 +17,6 @@ def get_uvigo():
 
 def __tokenization_and_stemmer(line):
     tokenized_words = [PorterStemmer().stem(word) for word in word_tokenize(line.lower().decode('utf-8'), 'portuguese')]
-    tokenized_words = tokenized_words.__str__()
     return tokenized_words
 
 
@@ -44,7 +43,7 @@ def __scrapping_links(links):
             html = BeautifulSoup(req.text, "lxml")  # Pasamos el contenido HTML de la web a un objeto BeautifulSoup()
             job_title = html.find('div', {'id': 'contido'}).find('h1').getText()
             city = fecha_inicio_publicacion = destinatarios = empresa = remuneracion = numero_vacantes = duracion = None
-            imprescindible = competencias = requirese = None
+            imprescindible = competencias = requirese = conocimientos = funciones = None
             for div in html.find_all('div', {'class': 'taboa_fila'}):
                 if "Tipo convocatoria" in div.getText():
                     tipo_convocatoria = div.find_all('div')[1].getText()
@@ -104,7 +103,12 @@ def __scrapping_links(links):
             oferta.salario_min = remuneracion
             oferta.numero_vacantes = numero_vacantes
             oferta.titulacion = destinatarios
-            oferta.requisitos = funciones.decode('utf-8') + conocimientos
+            if funciones is not None and conocimientos is not None:
+                oferta.requisitos = funciones + conocimientos
+            elif funciones is not None and conocimientos is None:
+                oferta.requisitos = funciones
+            else:
+                oferta.requisitos = conocimientos
             oferta.imprescindible = imprescindible
             oferta.competencias = competencias
             oferta.requirese = requirese
