@@ -40,17 +40,19 @@ def actualizar_localizacion(database):
 
 
 #TODO ver que hacer con esto, si meterlo en nuestra propia db o no, ya que podemos usar al externa
-'''def infojobs_DB():
+def infojobs_DB():
     #skills_db = mongodb.get_db(database_ip, database_port, database_habilidades)
     req = requests.get('https://api.infojobs.net/api/1/dictionary/type/skills',
                        auth=('2fe25988a01f48c59b36425abd6329b8', 'DHn5nyC8m1ByxAT1tnJUHjmwr4oZuYV82vVKlXqOKdCh6h4E05'))
     if req.status_code is 200:
         res_json = req.json()
+        #print res_json
         for skill in res_json:
-            print(skill['name'])
+            if 'java' in skill['name'].lower():
+                print(skill['name'].lower())
             #mongodb.add_update_element(skills_db, skill)
 
-    req = requests.get('https://api.infojobs.net/api/1/dictionary/type/certifications',
+    '''req = requests.get('https://api.infojobs.net/api/1/dictionary/type/certifications',
                         auth=('2fe25988a01f48c59b36425abd6329b8', 'DHn5nyC8m1ByxAT1tnJUHjmwr4oZuYV82vVKlXqOKdCh6h4E05'))
     if req.status_code is 200:
         res_json = req.json()
@@ -74,7 +76,7 @@ def actualizar_localizacion(database):
 
 
 
-#TODO Consultas SPARQL????¿¿¿???¿¿¿
+#TODO Consultas SPARQL???????
 '''def search_sparql(word):
     sparql = SPARQLWrapper("http://dbpedia.org/sparql")
     sparql.setQuery(
@@ -91,7 +93,7 @@ def print_result(results):
 
 def main():
     #infojobs_DB()
-    #actualizar_localizacion(mongodb.get_db(database_ip, database_port, database_ofertas))
+    actualizar_localizacion(mongodb.get_db(database_ip, database_port, database_ofertas))
     #actualizar_localizacion(mongodb.get_db(database_ip, database_port, database_usuarios))
     '''results = search_sparql("Asturias")
     print_result(results)
