@@ -6,4 +6,5 @@ Librerrías necesarias:
 - pymongo
 - requests
 - nltk
+- geopy
 
