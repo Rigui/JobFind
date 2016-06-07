@@ -7,8 +7,8 @@ geolocator = Nominatim()
 geonames = GeoNames(username="demo")
 
 def calculo_distancia_ciudades(ciudad_usuario, ciudad_oferta):
-    location_user = geolocator.geocode(ciudad_usuario)
-    location_oferta = geolocator.geocode(ciudad_oferta)
+    location_user = get_location_ciudad(ciudad_usuario)
+    location_oferta = get_location_ciudad(ciudad_oferta)
     usuario_cordenadas = (location_user.latitude, location_user.longitude)
     oferta_cordenadas = (location_oferta.latitude, location_oferta.longitude)
     return vincenty(usuario_cordenadas, oferta_cordenadas).kilometers
@@ -59,6 +59,12 @@ def get_pais(ciudad):
     return pais
 
 def get_ciudad_completa(ciudad):
+    location = get_location_ciudad(ciudad)
+    if location is None:
+        return None
+    return location.address.lower()
+
+def get_location_ciudad(ciudad):
     cordenadas = geonames.geocode(ciudad)
     if cordenadas is not None:
         ciudad_correcta = cordenadas.address.split(",")[0]
@@ -67,7 +73,7 @@ def get_ciudad_completa(ciudad):
             return None
     else:
         return None
-    return location.address.lower()
+    return location
 
 
 
