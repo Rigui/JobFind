@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import requests
 import oferta_class
 from nltk.stem.porter import *
@@ -16,19 +17,18 @@ def get_infojobs():
 
     if req.status_code is 200:
         res_json = req.json()
-        # print "currentResults: {}".format(res_json["currentResults"])
-        # print "totalPages: {}".format(res_json["totalPages"])
-        # print "currentPage: {}".format(res_json["currentPage"])
-        # print "totalResults: {}".format(res_json["totalResults"])
         ofertas = []
         for offer in res_json["offers"]:
-            province = __tokenization_and_stemmer(offer["province"]["value"].encode('utf-8'))
-            city = offer["city"].lower().encode('utf-8')
+            province = str(offer["province"]["value"].encode('utf-8')).lower()
+            city = str(offer["city"].lower().encode('utf-8'))
             published_date = __tokenization_and_stemmer(offer["published"].encode('utf-8'))
             link = offer["link"]
             updated_date = __tokenization_and_stemmer(offer["updated"].encode('utf-8'))
             job_title = __tokenization_and_stemmer(offer["title"].encode('utf-8'))
-            nivel_titulacion = __tokenization_and_stemmer(offer["study"]["value"].encode('utf-8'))
+            titulacion = offer["study"]["value"].encode('utf-8')
+            nivel_titulacion = 0
+            nivel_titulacion = __get_nivel_titulacion(str(titulacion), nivel_titulacion)
+            titulacion = __tokenization_and_stemmer(titulacion)
             author_name = offer["author"]["name"]
             author_uri = __tokenization_and_stemmer(offer["author"]["uri"].encode('utf-8'))
             experience = __tokenization_and_stemmer(offer["experienceMin"]["value"].encode('utf-8'))
@@ -54,3 +54,22 @@ def get_infojobs():
             ofertas.append(oferta.to_json())
 
         return ofertas
+
+
+def __get_nivel_titulacion(txt, nivel_titulacion):
+    if "doct" in txt.lower() and (nivel_titulacion > 6 or nivel_titulacion is 0):
+        nivel_titulacion = 6
+    if "licenciado" in txt.lower() or "máster" in txt.lower() \
+            or ("enxeñeiro" in txt.lower() and "técnico" not in txt.lower()) \
+            and (nivel_titulacion > 5 or nivel_titulacion is 0):
+        nivel_titulacion = 5
+    if "diplomado" in txt.lower() or "grao" in txt.lower() \
+            or "enxeñeiro técnico" in txt.lower() and (nivel_titulacion > 4 or nivel_titulacion is 0):
+        nivel_titulacion = 4
+    if "ciclo" in txt.lower() and (nivel_titulacion > 3 or nivel_titulacion is 0):
+        nivel_titulacion = 3
+    if "bacharelato" in txt.lower() and (nivel_titulacion > 2 or nivel_titulacion is 0):
+        nivel_titulacion = 2
+    if "secundaria" in txt.lower() and (nivel_titulacion > 1 or nivel_titulacion is 0):
+        nivel_titulacion = 1
+    return nivel_titulacion

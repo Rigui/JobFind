@@ -44,6 +44,7 @@ def __scrapping_links(links):
             job_title = html.find('div', {'id': 'contido'}).find('h1').getText()
             city = fecha_inicio_publicacion = destinatarios = empresa = remuneracion = numero_vacantes = duracion = None
             imprescindible = competencias = requirese = conocimientos = funciones = None
+            nivel_titulacion = 0
             for div in html.find_all('div', {'class': 'taboa_fila'}):
                 if "Tipo convocatoria" in div.getText():
                     tipo_convocatoria = div.find_all('div')[1].getText()
@@ -54,7 +55,7 @@ def __scrapping_links(links):
                 elif "Fecha Fin Publicación".decode('utf-8') in div.getText():
                     fecha_fin_publicacion = div.find_all('div')[1].getText()
                 elif "Lugar de trabajo".decode('utf-8') in div.getText():
-                    city = div.find_all('div')[1].getText().lower().encode('utf-8')
+                    city = str(div.find_all('div')[1].getText().lower().encode('utf-8'))
                 elif "Jornada completa".decode('utf-8') in div.getText():
                     jornada_completa = div.find_all('div')[1].getText()
                 elif "Remuneración".decode('utf-8') in div.getText():
@@ -65,6 +66,7 @@ def __scrapping_links(links):
                         city = str(funciones).lower().split("lugar de traballo: ")[1].split("\n")[0].lower()
                     if "REQ" in funciones and "RESE:" in funciones:
                         requirese = (str(funciones).lower().split("rese:")[1]).split("ofrécese")[0]
+                        nivel_titulacion = __get_nivel_titulacion(requirese, nivel_titulacion)
                         funciones = str(funciones).lower().replace(requirese, "")
                         requirese = __tokenization_and_stemmer(requirese)
                     if "Duración: " in funciones:
@@ -74,28 +76,35 @@ def __scrapping_links(links):
                     funciones = __tokenization_and_stemmer(funciones)
                 elif "Conocimientos".decode('utf-8') in div.getText():
                     conocimientos = div.find_all('div')[1].getText().encode('utf-8')
-                    if "imprescindible" in conocimientos.lower() and "competencias transversais" in conocimientos.lower():
+                    if "imprescindible" in conocimientos.lower() and "competencias transversais"\
+                            in conocimientos.lower():
                         imprescindible = \
-                            (str(conocimientos).lower().split("imprescindible")[1]).split("competencias transversais")[0]
+                            (str(conocimientos).lower().split("imprescindible")[1]).split("competencias transversais")[
+                                0]
                         competencias = str(conocimientos).lower().split("competencias transversais")[1]
-                        conocimientos = str(conocimientos).lower().replace("imprescindible", "").replace(imprescindible, "")
+                        conocimientos = str(conocimientos).lower().replace("imprescindible", "").replace(imprescindible,
+                                                                                                         "")
                         conocimientos = str(conocimientos).lower().replace("competencias", "").replace(competencias, "")
                         imprescindible = __tokenization_and_stemmer(imprescindible)
                         competencias = __tokenization_and_stemmer(competencias)
                     elif "imprescindible" not in conocimientos.lower() and \
-                                    "competencias transversais" in str(conocimientos).lower():
+                            "competencias transversais" in str(conocimientos).lower():
                         competencias = str(conocimientos).lower().split("competencias transversais")[1]
                         conocimientos = str(conocimientos).lower().replace(
                             "competencias transversais" + competencias, "")
                         competencias = __tokenization_and_stemmer(competencias)
                     elif "imprescindible" in conocimientos.lower() and \
-                                    "competencias transversais" not in str(conocimientos).lower():
+                            "competencias transversais" not in str(conocimientos).lower():
                         imprescindible = (str(conocimientos).lower().split("imprescindible")[1]).split("\n")[0]
-                        conocimientos = str(conocimientos).lower().replace("imprescindible", "").replace(imprescindible, "")
+                        conocimientos = str(conocimientos).lower().replace("imprescindible", "").replace(imprescindible,
+                                                                                                         "")
                         imprescindible = __tokenization_and_stemmer(imprescindible)
                     conocimientos = __tokenization_and_stemmer(conocimientos)
                 elif "Destinatarios".decode('utf-8') in div.getText():
                     destinatarios = __tokenization_and_stemmer(div.find_all('div')[1].getText().encode('utf-8'))
+                    titulaciones = str(destinatarios).split("|")
+                    for titulo in titulaciones:
+                        nivel_titulacion = __get_nivel_titulacion(titulo, nivel_titulacion)
                 elif "Empresa".decode('utf-8') in div.getText():
                     empresa = div.find_all('div')[1].getText()
 
@@ -113,6 +122,26 @@ def __scrapping_links(links):
             oferta.competencias = competencias
             oferta.requirese = requirese
             oferta.duracion = duracion
+            oferta.nivel_titulacion = nivel_titulacion
             ofertas.append(oferta.to_json())
 
     return ofertas
+
+
+def __get_nivel_titulacion(txt, nivel_titulacion):
+    if "doct" in txt.lower() and (nivel_titulacion > 6 or nivel_titulacion is 0):
+        nivel_titulacion = 6
+    if "licenciado" in txt.lower() or "máster" in txt.lower() \
+            or ("enxeñeiro" in txt.lower() and "técnico" not in txt.lower()) \
+            and (nivel_titulacion > 5 or nivel_titulacion is 0):
+        nivel_titulacion = 5
+    if "diplomado" in txt.lower() or "grao" in txt.lower() \
+            or "enxeñeiro técnico" in txt.lower() and (nivel_titulacion > 4 or nivel_titulacion is 0):
+        nivel_titulacion = 4
+    if "ciclo" in txt.lower() and (nivel_titulacion > 3 or nivel_titulacion is 0):
+        nivel_titulacion = 3
+    if "bacharelato" in txt.lower() and (nivel_titulacion > 2 or nivel_titulacion is 0):
+        nivel_titulacion = 2
+    if "secundaria" in txt.lower() and (nivel_titulacion > 1 or nivel_titulacion is 0):
+        nivel_titulacion = 1
+    return nivel_titulacion
