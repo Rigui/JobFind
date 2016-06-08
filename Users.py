@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 class Users:
-    def __init__(self, nombre, apellidos):
+    def __init__(self, nombre, apellidos,email):
         self.nombre = nombre
         self.apellidos = apellidos
         self.pais = None
@@ -16,8 +16,8 @@ class Users:
         self.desplazamiento = None
         self.competencias = None  # {{competencia:nivel},}
         self.habilidades = None  # {{competencia:nivel},}
-        self.email = None
-        self._id = None
+        self.email = email
+        self._id = email
 
     def toDBCollection(self):
         return {

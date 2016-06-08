@@ -249,7 +249,6 @@ def __get_requisitos(db_requisitos):
     return habilidadesDB, competenciasDB
 
 
-# def user_actualizacion_skills():
 def get_linkedin_info():
     db_requisitos = mongodb.get_db(database_ip, database_port, database_requisitos)
     habilidadesDB, competenciasDB = __get_requisitos(db_requisitos)
@@ -273,7 +272,7 @@ def get_linkedin_info():
     usuario = None
     if usuario_db is not None:
         print "Usuario encontrado\nActualizando..."
-        usuario = Users.Users(nombre, apellidos)
+        usuario = Users.Users(nombre, apellidos,email)
         usuario.id = usuario_db['_id']
         usuario.ciudad = usuario_db['ciudad']
         usuario.idiomas = usuario_db['idiomas']
@@ -283,7 +282,7 @@ def get_linkedin_info():
         usuario.estudios = usuario_db['estudios']
         usuario.empresas = usuario_db['empresas']
     else:
-        usuario = Users.Users(nombre, apellidos)
+        usuario = Users.Users(nombre, apellidos,email)
 
     usuario.ciudad = ciudad
     usuario.email = email

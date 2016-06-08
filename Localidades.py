@@ -43,6 +43,8 @@ def get_comunidad(ciudad):
             comunidad = localizacion[3]
         elif longitud is 4:
             comunidad = localizacion[2]
+        elif longitud is 1:
+            comunidad = localizacion[0]
         else:
             comunidad = localizacion[1]
     return comunidad
@@ -59,6 +61,10 @@ def get_pais(ciudad):
             pais = localizacion[4]
         elif longitud is 4:
             pais = localizacion[3]
+        elif longitud is 2:
+            pais = localizacion[1]
+        elif longitud is 1:
+            pais = localizacion[0]
         else:
             pais = localizacion[2]
     return pais

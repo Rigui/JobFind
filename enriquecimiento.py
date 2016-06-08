@@ -19,5 +19,4 @@ def enriquecimiento():
         cont += 1
     print("Inicio relaciones")
     Emp.relacionadas(colOfer, colTit)
-
-enriquecimiento()
+    return
