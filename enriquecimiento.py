@@ -16,4 +16,4 @@ def enriquecimiento():
     for doc in docs:
         Gen.generarExperiencia(colOfer, doc)
     print("inicio relaciones")
-    Emp.relacionadas(colOfer, colReq, colTit)
+    Emp.relacionadas(colOfer, colTit)
