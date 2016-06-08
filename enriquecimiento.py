@@ -9,7 +9,8 @@ def enriquecimiento():
     print "Inicio enriquecimiento ofertas"
     colOfer = mongodb.get_db(database_ip, database_port, "ofertas")
     colTit = mongodb.get_db(database_ip, database_port, "titulos")
-    # rellena la experiencia de aquellas que no lo tengan (no actualiza -> el objetivo es completar, no inventar)
+    # rellenar la experiencia de aquellas que no lo tengan
+    # (no actualiza las que ya tienen un valor -> el objetivo es completar, no inventar)
     docs = colOfer.find({'experiencia_min': {'$type': 10}})
 
     cont = 0

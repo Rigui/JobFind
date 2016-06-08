@@ -1,6 +1,10 @@
+# coding: UTF-8
+
 from lxml import etree
 import mongodb
 
+# no se añaden los datasets al git dado que cada uno de ellos tenía un peso de unos 100MB, resultando una carga excesiva
+# no obstante, se corresponden a las primeras 375000 empresas listadas en Sabi bajo 'Todas las empresas'
 cont = 0
 col = mongodb.get_db("52.208.8.144", 8080, "ranking")
 docs = []
