@@ -18,7 +18,7 @@ def relacionadas(colOfer, colTit):
 
         for p in parecidas:
             parImp, parCom = ratioParecidoReq(oferta, p)
-            parTit = ratioParecidoTitulacion(oferta, p, colTit)
+            # parTit = ratioParecidoTitulacion(oferta, p, colTit)
             val = (0.8 * parImp + 0.2 * parCom)  # / 2 + parTit / 2
             if val >= 0.2:
                 if p['empresa'] != oferta['empresa']:
