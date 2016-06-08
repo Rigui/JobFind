@@ -16,6 +16,9 @@ database_usuarios = "Users"
 def buscar(email):
     db_user = mongodb.get_db(database_ip, database_port, database_usuarios)
     usuario_db = db_user.find_one({'email': email})
+    if usuario_db is None:
+        print "Usuario no encontrado"
+        return
     ofertas = Relevancia.get_relevancia(usuario_db, Filtrar_ofertas.get_ofertas(usuario_db))
 
     ofertas = sorted(ofertas, key=operator.itemgetter("nota_user"), reverse=True)
