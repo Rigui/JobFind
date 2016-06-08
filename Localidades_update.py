@@ -3,7 +3,7 @@ import Localidades
 import mongodb
 
 __database_ip = "52.208.8.144"
-__database_port = 27017
+__database_port = 8080
 __database_ofertas = "ofertas"
 __database_usuarios = "Users"
 

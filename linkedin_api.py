@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import time
 import webbrowser
 
 import requests
@@ -8,9 +9,10 @@ from nltk.stem.porter import *
 from nltk.tokenize import *
 
 import Users
+import mongodb
 
 database_ip = "52.208.8.144"
-database_port = 27017
+database_port = 8080
 database_requisitos = "requisitos"
 database_ofertas = "ofertas"
 database_usuarios = "Users"
@@ -28,7 +30,8 @@ def __conect_to_linkedin():
     access_token = li.getAccessToken(token, validator)
     return li, access_token
 
-def __get_public_profile(li,access_token):
+
+def __get_public_profile(li, access_token):
     liapi = LinkedInApi(li)
     response = liapi.doApiRequest("https://api.linkedin.com/v1/people/~:(public-profile-url)", access_token)
     soup = BeautifulSoup(response)
@@ -37,17 +40,26 @@ def __get_public_profile(li,access_token):
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.73 Safari/537.36'}
     return requests.request('GET', public_url, headers=headers)
 
-def __get_skills_linkedin(li, access_token):
-    skills_list = []
-    req = __get_public_profile(li,access_token)
+
+def __get_skills_linkedin(li, access_token, habilidadesDB, competenciasDB):
+    habilidades_dict = {}
+    competencias_dict = {}
+    req = __get_public_profile(li, access_token)
     status_code = req.status_code
     if status_code == 200:
         html = BeautifulSoup(req.text)
         for div in html.find_all('li', {'class': 'skill'}):
             skills = div.find_all('a')
             for skill in skills:
-                skills_list.append(skill.get('title').lower())
-    return skills_list
+                conocimiento = skill.get('title').lower()
+                if conocimiento in competenciasDB:
+                    competencias_dict[conocimiento] = 2
+                elif conocimiento in habilidadesDB:
+                    habilidades_dict[conocimiento] = 2
+                else:
+                    habilidades_dict[conocimiento] = 2
+                    habilidadesDB.append(conocimiento)
+    return habilidades_dict, competencias_dict, habilidadesDB, competenciasDB
 
 
 def __get_email(li, access_token):
@@ -69,7 +81,8 @@ def __get_nombre(li, access_token):
 
 def __get_estudios(li, access_token):
     estudios_list = []
-    req = __get_public_profile(li,access_token)
+    nivel_titulacion_maximo = 0
+    req = __get_public_profile(li, access_token)
     status_code = req.status_code
     if status_code == 200:
         html = BeautifulSoup(req.text)
@@ -95,12 +108,16 @@ def __get_estudios(li, access_token):
                 else:
                     fecha_fin = fecha.getText().lower()
                 index += 1
-            estudios_list.append(['nivel titulo', nombre_titulo, nombre_centro, fecha_inicio, fecha_fin])
-    return estudios_list
+            nivel_titulacion, titulacion = __inferir_nivel_titulo(nombre_titulo)
+            if nivel_titulacion > nivel_titulacion_maximo:
+                nivel_titulacion_maximo = nivel_titulacion
+            estudios_list.append([titulacion, nombre_titulo, nombre_centro, fecha_inicio, fecha_fin])
+    return estudios_list, nivel_titulacion_maximo
+
 
 def __get_idiomas(li, access_token):
     idiomas_dic = {}
-    req = __get_public_profile(li,access_token)
+    req = __get_public_profile(li, access_token)
     status_code = req.status_code
     if status_code == 200:
         html = BeautifulSoup(req.text)
@@ -115,40 +132,42 @@ def __get_localidad(li, access_token):
     liapi = LinkedInApi(li)
     response = liapi.doApiRequest("https://api.linkedin.com/v1/people/~:(location)", access_token)
     soup = BeautifulSoup(response)
-    localidad = soup.find('name').string
-    return localidad
+    localidad = soup.find('name').string.split()
+    return localidad[0]
 
 
-def __get_experiencia_inferir_skills(li, access_token, db_requisitos):
-    new_competencias = []
-    new_imprescindibles = []
-    # TODO Substituir por db
-    competencias = ["adaptabilidad", "iniciativa", "trabajo en equipo", "decisión", "gestión", "xestión",
-                    "organización", "planificación", "aprendizaje autónomo", "creatividad", "resolución",
-                    "responsabilidad", "comunicación", "líder", "calidad", "ganas", "motivación", "identificación",
-                    "voluntariado"]
-    imprescindible = ["ofimática", "word", "excel", "autómatas", "java", "html5", "javaee", "relacionales",
-                      "arquitectura de sistemas", "e-commerce", "pyme", "internet", "redes sociales", "vehículo",
-                      "conducir", "linux", "http", "tcp/ip", "c++", "c#", "javascript", "ajax", "interfaz",
-                      "modelado 3d", "grandes volúmenes de datos", "git", "autocad", "contabilidad", "diseño",
-                      "software", "nube", "web", "móvil", "móbil", "gestión de obra", "alimentos", "derecho",
-                      "autoempleo", "informática", "igualdad de género"]
-
-    req = __get_public_profile(li,access_token)
+def __get_empresas(li, access_token, habilidades_dict, habilidadesDB):
+    req = __get_public_profile(li, access_token)
     status_code = req.status_code
     if status_code == 200:
+        fecha_inicio = fecha_fin = 0
+        empresas = []
         html = BeautifulSoup(req.text)
         for div in html.find_all('li', {'class': 'position'}):
+            nombre_empresa = div.find_all('h5', {'class': 'item-subtitle'})[0].getText().lower()
+            fechas = div.find_all('time')
+            index = 0
+            for fecha in fechas:
+                if index == 0:
+                    fecha = fecha.getText().split()
+                    fecha_inicio = fecha[len(fecha) - 1].lower()
+                else:
+                    fecha = fecha.getText().split()
+                    fecha_fin = fecha[len(fecha) - 1].lower()
+                    if "actu" in fecha_fin:
+                        fecha_fin = time.strftime("%Y")
+                index += 1
+            anos = int(fecha_fin) - int(fecha_inicio)
+            # Inferir conocimientos
             descripcion = div.find_all('p', {'class': 'description'})
-            descripcion_token = __tokenization_and_stemmer(descripcion[0].getText().lower())
-            print descripcion_token
+            descripcion_token = descripcion[0].getText().lower().split()
+            funciones = []
             for palabra in descripcion_token:
-                '''if palabra.encode('utf-8') in competencias:
-                    print palabra.encode('utf-8')'''
-                if "relacionales" in competencias:
-                    print "encontrado a mano"
-
-    return new_competencias, new_imprescindibles
+                if palabra in habilidadesDB:
+                    funciones.append(palabra)
+                    habilidades_dict[palabra] = 3
+            empresas.append([nombre_empresa, funciones, fecha_inicio, fecha_fin, anos])
+    return empresas, habilidades_dict
 
 
 def __get_nivel_titulacion(txt, nivel_titulacion):
@@ -169,19 +188,46 @@ def __get_nivel_titulacion(txt, nivel_titulacion):
         nivel_titulacion = 1
     return nivel_titulacion
 
+
 def __inferir_nivel_idioma(txt):
-    nivel_idioma = 0
-    if "nativa" in txt.lower():
+    nivel_idioma = 1
+    txt = txt.lower().split()
+    if "native" in txt:
+        nivel_idioma = 6
+    if "full" in txt:
         nivel_idioma = 5
-    if "completa" in txt.lower() and "profesional" in txt.lower():
+    if "working" in txt:
         nivel_idioma = 4
-    if "sica" in txt.lower() and "profesional" in txt.lower():
+    if "limited" in txt:
         nivel_idioma = 3
-    if "limitada" in txt.lower():
+    if "elementary" in txt:
         nivel_idioma = 2
-    if "basica" in txt.lower():
-        nivel_idioma = 1
     return nivel_idioma
+
+
+def __inferir_nivel_titulo(txt):
+    nivel_titulacion = 0
+    titulacion = ""
+    txt = txt.lower().split()
+    if "doct" in txt:
+        nivel_titulacion = 6
+        titulacion = "doct"
+    if "licenciado" in txt or "máster" in txt or "master" in txt:
+        nivel_titulacion = 5
+        titulacion = "licenciado"
+    if "diplomado" in txt or "grao" in txt or "enxeñeiro técnico" in txt or "grado" in txt or "graduado" in txt:
+        nivel_titulacion = 4
+        titulacion = "diplomado"
+    if "ciclo" in txt:
+        nivel_titulacion = 3
+        titulacion = "ciclo"
+    if "bacharelato" in txt or "bachillerato" in txt:
+        nivel_titulacion = 2
+        titulacion = "bachillerato"
+    if "secundaria" in txt:
+        nivel_titulacion = 1
+        titulacion = "secundaria"
+    return nivel_titulacion, titulacion
 
 
 def __tokenization_and_stemmer(line):
@@ -189,19 +235,80 @@ def __tokenization_and_stemmer(line):
     return tokenized_words
 
 
+def __get_requisitos(db_requisitos):
+    habilidadesDB = []
+    competenciasDB = []
+    imprescindibles = mongodb.get_element(db_requisitos, {'nivReq': 'imprescindible'})
+    competencias = mongodb.get_element(db_requisitos, {'nivReq': 'competencias'})
+    for imprescindible_values in imprescindibles:
+        for skill in imprescindible_values['value']:
+            habilidadesDB.append(skill)
+    for competencias_values in competencias:
+        for skill in competencias_values['value']:
+            competenciasDB.append(skill)
+    return habilidadesDB, competenciasDB
+
+
 # def user_actualizacion_skills():
 def get_linkedin_info():
+    db_requisitos = mongodb.get_db(database_ip, database_port, database_requisitos)
+    habilidadesDB, competenciasDB = __get_requisitos(db_requisitos)
     linkedin_conection, access_token = __conect_to_linkedin()
+    print "Conectado al perfil de linkedin\n Obteniendo datos"
     nombre, apellidos = __get_nombre(linkedin_conection, access_token)
-    localidad = __get_localidad(linkedin_conection, access_token)
-    skill_list = __get_skills_linkedin(linkedin_conection, access_token)
+    ciudad = __get_localidad(linkedin_conection, access_token)
+    habilidades_dict, competencias_dict, habilidadesDB, competenciasDB = __get_skills_linkedin(linkedin_conection,
+                                                                                               access_token,
+                                                                                               habilidadesDB,
+                                                                                               competenciasDB)
+    empresas, habilidades_dict = __get_empresas(linkedin_conection, access_token, habilidades_dict, habilidadesDB)
     email = __get_email(linkedin_conection, access_token)
-    idiomas = __get_idiomas(linkedin_conection,access_token)
-    estudios = __get_estudios(linkedin_conection, access_token)
-    #skill_inferidas = __get_experiencia_inferir_skills(linkedin_conection, access_token, database_requisitos)
-    usuario = Users.Users(nombre=nombre,apellidos=apellidos,localidad=localidad,estudios=estudios,competencias=skill_list)
+    idiomas = __get_idiomas(linkedin_conection, access_token)
+    estudios_dict, nivel_titulacion = __get_estudios(linkedin_conection, access_token)
+    # creamos la entidad usuario
+    print "Datos Obtenidos\nGuardando..."
+    db_user = mongodb.get_db(database_ip, database_port, database_usuarios)
 
+    usuario_db = db_user.find_one({'email': email})
+    usuario = None
+    if usuario_db is not None:
+        print "Usuario encontrado\nActualizando..."
+        usuario = Users.Users(nombre, apellidos)
+        usuario.id = usuario_db['_id']
+        usuario.ciudad = usuario_db['ciudad']
+        usuario.idiomas = usuario_db['idiomas']
+        usuario.nivel_titulacion = usuario_db['nivel_titulacion']
+        usuario.competencias = usuario_db['competencias']
+        usuario.habilidades = usuario_db['habilidades']
+        usuario.estudios = usuario_db['estudios']
+        usuario.empresas = usuario_db['empresas']
+    else:
+        usuario = Users.Users(nombre, apellidos)
 
-''''db_requisitos = mongodb.get_db(database_ip, database_port, database_requisitos)
-skill_inferidas = __get_experiencia_inferir_skills(linkedin_conection,access_token,db_requisitos)
-db_user = mongodb.get_db(database_ip, database_port, database_usuarios)'''
+    usuario.ciudad = ciudad
+    usuario.email = email
+    usuario.idiomas = idiomas
+    usuario.nivel_titulacion = nivel_titulacion
+    if usuario.competencias is None:
+        usuario.competencias = competencias_dict
+    else:
+        usuario.competencias.update(competencias_dict)
+    if usuario.habilidades is None:
+        usuario.habilidades = habilidades_dict
+    else:
+        usuario.habilidades.update(habilidades_dict)
+    if usuario.estudios is None:
+        usuario.estudios = estudios_dict
+    else:
+        for estudio in estudios_dict:
+            if estudio not in usuario.estudios:
+                usuario.estudios.append(estudio)
+    if usuario.empresas is None:
+        usuario.empresas = empresas
+    else:
+        for empresa in empresas:
+            if empresa not in usuario.empresas:
+                usuario.empresas.append(empresa)
+    mongodb.add_update_element(db_user, usuario.toDBCollection())
+    print "Usuario Guardado: " + nombre + " " + apellidos
+    return

@@ -8,7 +8,7 @@ class Users:
         self.comunidad = None
         self.provincia = None
         self.ciudad = None
-        self.estudios = None
+        self.estudios = None #[[Titulacion,Nombre titulacion, fecha inicio, fecha fin],]
         self.nivel_titulacion = None
         self.idiomas = None  # {{idioma:nivel}}
         self.empresas = None  # [[Nombre empresa, funciones, fecha inicio, fecha fin, años],]
@@ -17,6 +17,7 @@ class Users:
         self.competencias = None  # {{competencia:nivel},}
         self.habilidades = None  # {{competencia:nivel},}
         self.email = None
+        self._id = None
 
     def toDBCollection(self):
         return {
@@ -33,8 +34,9 @@ class Users:
             "remuneracion": self.remuneracion,
             "desplazamiento": self.desplazamiento,
             "competencias": self.competencias,
-            "desarrollo": self.habilidades,
+            "habilidades": self.habilidades,
             "email": self.email,
+            '_id': self._id,
         }
 
     def __str__(self):
