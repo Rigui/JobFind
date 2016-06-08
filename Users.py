@@ -1,39 +1,42 @@
 # -*- coding: utf-8 -*-
 
 class Users:
-
-    def __init__(self, nombre, apellidos, provincia, localidad, estudios, empresas, cursillos, remuneracion, desplazmiento, clase_contrato, competencias, desarrollo, sistemas):
+    def __init__(self, nombre, apellidos):
         self.nombre = nombre
         self.apellidos = apellidos
-        self.provincia = provincia
-        self.localidad = localidad
-        self.estudios = estudios
-        self.empresas = empresas
-        self.cursillos = cursillos
-        self.remuneracion = remuneracion
-        self.desplazamiento = desplazmiento
-        self.clase_contrato = clase_contrato
-        self.competencias = competencias
-        self.desarrollo = desarrollo
-        self.sistemas = sistemas
+        self.pais = None
+        self.comunidad = None
+        self.provincia = None
+        self.ciudad = None
+        self.estudios = None
+        self.nivel_titulacion = None
+        self.idiomas = None  # {{idioma:nivel}}
+        self.empresas = None  # [[Nombre empresa, funciones, fecha inicio, fecha fin, años],]
+        self.remuneracion = None
+        self.desplazamiento = None
+        self.competencias = None  # {{competencia:nivel},}
+        self.habilidades = None  # {{competencia:nivel},}
+        self.email = None
 
-    def toDBCollection (self):
-        return{
+    def toDBCollection(self):
+        return {
             "nombre": self.nombre,
             "apellidos": self.apellidos,
+            "pais": self.pais,
+            "comunidad": self.comunidad,
             "provincia": self.provincia,
-            "localidad": self.localidad,
+            "ciudad": self.ciudad,
             "estudios": self.estudios,
+            "nivel_titulacion": self.nivel_titulacion,
+            "idiomas": self.idiomas,
             "empresas": self.empresas,
-            "cursillos": self.cursillos,
             "remuneracion": self.remuneracion,
             "desplazamiento": self.desplazamiento,
-            "clase_contrato": self.clase_contrato,
             "competencias": self.competencias,
-            "desarrollo": self.desarrollo,
-            "sistemas": self.sistemas
+            "desarrollo": self.habilidades,
+            "email": self.email,
         }
 
     def __str__(self):
-        return "Nombre: %s - Apellidos: %s - Provincia: %s - Localidad: %s" %(self.nombre, self.apellidos, self.provincia, self.localidad)
-
+        return "Nombre: %s - Apellidos: %s - Provincia: %s - Localidad: %s" % (
+            self.nombre, self.apellidos, self.provincia, self.ciudad)
