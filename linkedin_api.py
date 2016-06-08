@@ -268,11 +268,12 @@ def get_linkedin_info():
     print "Datos Obtenidos\nGuardando..."
     db_user = mongodb.get_db(database_ip, database_port, database_usuarios)
 
+    desplazamiento = raw_input("Cuanto estarias dispuesto a desplazarte(0(localidad)-3(pais)):")
     usuario_db = db_user.find_one({'email': email})
     usuario = None
     if usuario_db is not None:
         print "Usuario encontrado\nActualizando..."
-        usuario = Users.Users(nombre, apellidos,email)
+        usuario = Users.Users(nombre, apellidos, email)
         usuario.id = usuario_db['_id']
         usuario.ciudad = usuario_db['ciudad']
         usuario.idiomas = usuario_db['idiomas']
@@ -282,11 +283,12 @@ def get_linkedin_info():
         usuario.estudios = usuario_db['estudios']
         usuario.empresas = usuario_db['empresas']
     else:
-        usuario = Users.Users(nombre, apellidos,email)
+        usuario = Users.Users(nombre, apellidos, email)
 
     usuario.ciudad = ciudad
     usuario.email = email
     usuario.idiomas = idiomas
+    usuario.desplazamiento = int(desplazamiento)
     usuario.nivel_titulacion = nivel_titulacion
     if usuario.competencias is None:
         usuario.competencias = competencias_dict

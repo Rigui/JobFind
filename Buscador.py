@@ -25,6 +25,6 @@ def buscar(email):
     print "Estas son las ofertas que hemos seleccionado apra ti"
     print ""
     for offers in ofertas:
-        print offers.get("url")
+        print str(offers.get("nota_user"))+" - "+offers.get("url")
     print ""
     return
