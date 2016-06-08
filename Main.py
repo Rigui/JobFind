@@ -29,7 +29,7 @@ while True:
     if opcionMenu == "1":
         print ""
         print "Has pulsado la opción 1...\nGenerando Base Datos ofertas"
-        Obtener_ofertas
+        Obtener_ofertas.obtener_ofertas()
         Localidades_update.actualizar_localizacion_ofertas()
         #TODO lo que falte para que se generen completas
     elif opcionMenu == "2":
@@ -43,6 +43,7 @@ while True:
     elif opcionMenu == "3":
         print ""
         raw_input("Has pulsado la opción 3...\nBuscando ofertas que coincidan con tu perfil")
+        #TODO busqueda
     elif opcionMenu == "9":
         break
     else:
