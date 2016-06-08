@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from pymongo import *
+import re
 
 mongoClient = MongoClient('52.208.8.144', 27017)
 
@@ -37,7 +38,10 @@ def __comprueba_desplazamiento(users, oferta):
 
 def __comprueba_idiomas(users, oferta, impres, find_idioma, idioma):
     if oferta.get(impres) is not None:
-        imprescindible = oferta.get(impres).lower()
+        imprescindible = ""
+        for campos in oferta.get(impres):
+            imprescindible += campos
+        imprescindible = imprescindible.lower()
         if imprescindible.find(find_idioma) is not -1:
             if imprescindible.find(find_idioma) > 8:
                 start = imprescindible.find(find_idioma) - 25
@@ -72,6 +76,46 @@ def __comprueba_idiomas(users, oferta, impres, find_idioma, idioma):
                     return False
         return True
 
+def __comprueba_nivel_titulacion(users, oferta):
+    if (int(users.get("nivel_titulacion")) >= int(oferta.get("nivel_titulacion"))):
+        return True
+    else:
+        return False
+
+def __comprueba_titulacion(users, oferta):
+    if users.get("estudios") is not None:
+        for titulo in users.get("estudios"):
+            if oferta.get("titulacion") is not None:#uvigo
+                for titulacion in oferta.get("titulacion"):
+                    if titulo[1].rsplit(' ', 1)[1][:-(len(titulo[1].rsplit(' ', 1)[1]))/4].lower() in titulacion.lower():
+                        return True
+                return False
+            #habría que comprobar ahora en infojobs
+            return True
+    elif oferta.get("titulacion") is None:
+        return True
+    else:
+        return False
+
+def __comprueba_exp_minima(users, oferta):
+    years = 0
+    for experiencia in oferta.get("experiencia_min"):
+        year = re.findall('\d+', experiencia)
+        if len(year) > 0:
+            if years < year:
+                years = year
+    if years > 0:#se solicitan años de experiencia
+        if users.get("empresas") is None:
+            return False
+        else:
+            for empresas in users.get("empresas"):
+                if empresas[-1] >= years:
+                    return True
+            return False
+    else:
+        return True
+
+
 #sería interesante primero filtrar por la titulación
 #luego filtrar por los requesitos mínimos
 def __comprueba_imprescindible(users, oferta):
@@ -93,9 +137,10 @@ def __filtra_ofertas(users):
     for offers in cursor_offer:
         if __comprueba_desplazamiento(users, offers) is not None:
             ofertas.append(__comprueba_desplazamiento(users, offers))
+    print 'se han encontrado %i empresas' %(len(ofertas))
     #segundo idiomas
     if ofertas is not None:
-        for offers in ofertas:
+        for offers in ofertas[:]:
             if __comprueba_idiomas(users, offers, "imprescindible", "ingl", 'ingles') is False:
                 ofertas.remove(offers)
             if __comprueba_idiomas(users, offers, "requisitos", "ingl", 'ingles') is False:
@@ -108,11 +153,28 @@ def __filtra_ofertas(users):
                 ofertas.remove(offers)
             if __comprueba_idiomas(users, offers, "requisitos", "alem", 'aleman') is False:
                 ofertas.remove(offers)
+    print 'se han quedado %i empresas después del tema de los idiomas' % (len(ofertas))
     #tercero titulacion
-    #if ofertas is not None:
-
-    #cuarto compruebo requisitos mínimos
     if ofertas is not None:
-        for offers in ofertas:
-            offers['nota_user'] = __comprueba_imprescindible(users, offers)
+        for offers in ofertas[:]:
+            if __comprueba_nivel_titulacion(users, offers) is False:
+                ofertas.remove(offers)
+    print 'se han quedado %i empresas después del tema del nivel de titulacion' % (len(ofertas))
+    #cuarto titulacion
+    if ofertas is not None:
+        for offers in ofertas[:]:
+            if __comprueba_titulacion(users, offers) is False:
+                ofertas.remove(offers)
+    print 'se han quedado %i empresas después del tema de la titulacion' % (len(ofertas))
+    #quinto exp mínima
+    if ofertas is not None:
+        for offers in ofertas[:]:
+            if offers.get("experiencia_min") is not None:
+                if __comprueba_exp_minima(users, offers) is False:
+                    ofertas.remove(offers)
+    print 'se han quedado %i empresas después del tema de la exp mínima' % (len(ofertas))
+    #sexto compruebo requisitos mínimos
+    # if ofertas is not None:
+    #     for offers in ofertas:
+    #         offers['nota_user'] = __comprueba_imprescindible(users, offers)
     return ofertas
