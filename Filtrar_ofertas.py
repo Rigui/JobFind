@@ -2,13 +2,13 @@
 
 from pymongo import *
 import re
+import Levenshtein
 
 mongoClient = MongoClient('52.208.8.144', 27017)
 
 def get_ofertas(users):
     ofertas = __filtra_ofertas(users)
     return ofertas
-
 
 def __comprueba_desplazamiento(users, oferta):
     if users.get("desplazamiento") == '0':
@@ -87,10 +87,9 @@ def __comprueba_titulacion(users, oferta):
         for titulo in users.get("estudios"):
             if oferta.get("titulacion") is not None:#uvigo
                 for titulacion in oferta.get("titulacion"):
-                    if titulo[1].rsplit(' ', 1)[1][:-(len(titulo[1].rsplit(' ', 1)[1]))/4].lower() in titulacion.lower():
+                    if Levenshtein.distance(titulo[1].rsplit(' ', 1)[1], titulacion) < 4:
                         return True
                 return False
-            #habría que comprobar ahora en infojobs
             return True
     elif oferta.get("titulacion") is None:
         return True
@@ -114,6 +113,9 @@ def __comprueba_exp_minima(users, oferta):
             return False
     else:
         return True
+
+def __comprueba_requisitos(users, offers):
+    return True
 
 
 #sería interesante primero filtrar por la titulación
@@ -154,7 +156,7 @@ def __filtra_ofertas(users):
             if __comprueba_idiomas(users, offers, "requisitos", "alem", 'aleman') is False:
                 ofertas.remove(offers)
     print 'se han quedado %i empresas después del tema de los idiomas' % (len(ofertas))
-    #tercero titulacion
+    #tercero nivel titulacion
     if ofertas is not None:
         for offers in ofertas[:]:
             if __comprueba_nivel_titulacion(users, offers) is False:
@@ -174,6 +176,12 @@ def __filtra_ofertas(users):
                     ofertas.remove(offers)
     print 'se han quedado %i empresas después del tema de la exp mínima' % (len(ofertas))
     #sexto compruebo requisitos mínimos
+    if ofertas is not None:
+        for offers in ofertas[:]:
+            if offers.get("imprescindible") is not None:
+                if __comprueba_requisitos(users, offers) is False:
+                    ofertas.remove(offers)
+    print 'se han quedado %i empresas después del tema de los requisitos' % (len(ofertas))
     # if ofertas is not None:
     #     for offers in ofertas:
     #         offers['nota_user'] = __comprueba_imprescindible(users, offers)

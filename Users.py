@@ -2,16 +2,20 @@
 
 class Users:
 
-    def __init__(self, nombre, apellidos, provincia, localidad, estudios, empresas, cursillos, remuneracion, desplazmiento, clase_contrato, competencias, desarrollo, sistemas):
+    def __init__(self, nombre, apellidos, pais, comunidad, provincia, ciudad, estudios, nivel_titulacion, idiomas, empresas, cursillos, remuneracion, desplazamiento, clase_contrato, competencias, desarrollo, sistemas):
         self.nombre = nombre
         self.apellidos = apellidos
+        self.pais = pais
+        self.comunidad = comunidad
         self.provincia = provincia
-        self.localidad = localidad
+        self.ciudad = ciudad
         self.estudios = estudios
+        self.nivel_titulacion = nivel_titulacion
+        self.idiomas = idiomas
         self.empresas = empresas
         self.cursillos = cursillos
         self.remuneracion = remuneracion
-        self.desplazamiento = desplazmiento
+        self.desplazamiento = desplazamiento
         self.clase_contrato = clase_contrato
         self.competencias = competencias
         self.desarrollo = desarrollo
@@ -21,9 +25,13 @@ class Users:
         return{
             "nombre": self.nombre,
             "apellidos": self.apellidos,
+            "pais": self.pais,
+            "comunidad": self.comunidad,
             "provincia": self.provincia,
-            "localidad": self.localidad,
+            "ciudad": self.ciudad,
             "estudios": self.estudios,
+            "nivel_titulacion": self.nivel_titulacion,
+            "idiomas": self.idiomas,
             "empresas": self.empresas,
             "cursillos": self.cursillos,
             "remuneracion": self.remuneracion,
@@ -36,4 +44,3 @@ class Users:
 
     def __str__(self):
         return "Nombre: %s - Apellidos: %s - Provincia: %s - Localidad: %s" %(self.nombre, self.apellidos, self.provincia, self.localidad)
-
