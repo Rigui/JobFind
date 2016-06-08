@@ -136,13 +136,11 @@ def __filtra_ofertas(users):
     cursor_offer = collection_offer.find()
     ofertas = []
     #primero compruebo desplazamiento
-    print users.get("desplazamiento")
     for offers in cursor_offer:
         if __comprueba_desplazamiento(users, offers) is not None:
             ofertas.append(__comprueba_desplazamiento(users, offers))
-    print 'se han encontrado %i empresas' %(len(ofertas))
+    print 'Se han encontrado %i empresas' %(len(ofertas))
     #segundo idiomas
-    print users.get("idiomas")
     if ofertas is not None:
         for offers in ofertas[:]:
             if __comprueba_idiomas(users, offers, "imprescindible", "ingl", 'ingles') is False:
@@ -157,34 +155,31 @@ def __filtra_ofertas(users):
                 ofertas.remove(offers)
             if __comprueba_idiomas(users, offers, "requisitos", "alem", 'aleman') is False:
                 ofertas.remove(offers)
-    print 'se han quedado %i empresas después del tema de los idiomas' % (len(ofertas))
+    print 'Se han quedado %i empresas después del filtro de idiomas' % (len(ofertas))
     #tercero nivel titulacion
-    print users.get("nivel_titulacion")
     if ofertas is not None:
         for offers in ofertas[:]:
             if __comprueba_nivel_titulacion(users, offers) is False:
                 ofertas.remove(offers)
-    print 'se han quedado %i empresas después del tema del nivel de titulacion' % (len(ofertas))
+    print 'Se han quedado %i empresas después del filtro del nivel de titulacion' % (len(ofertas))
     #cuarto titulacion
-    print users.get("titulacion")
     if ofertas is not None:
         for offers in ofertas[:]:
             if __comprueba_titulacion(users, offers) is False:
                 ofertas.remove(offers)
-    print 'se han quedado %i empresas después del tema de la titulacion' % (len(ofertas))
+    print 'Se han quedado %i empresas después del filtro de la titulacion' % (len(ofertas))
     #quinto exp mínima
     if ofertas is not None:
         for offers in ofertas[:]:
             if not offers.get("experiencia_min"):
                 if __comprueba_exp_minima(users, offers) is False:
                     ofertas.remove(offers)
-    print 'se han quedado %i empresas después del tema de la exp mínima' % (len(ofertas))
+    print 'Se han quedado %i empresas después del filtro de la exp mínima' % (len(ofertas))
     #sexto compruebo requisitos mínimos
-    print users.get("habilidades")
     if ofertas is not None:
         for offers in ofertas[:]:
             if offers.get("imprescindible") is not None:
                 if __comprueba_requisitos(users, offers) is False:
                     ofertas.remove(offers)
-    print 'se han quedado %i empresas después del tema de los requisitos' % (len(ofertas))
+    print 'Se han quedado %i empresas después del filtro de los requisitos' % (len(ofertas))
     return ofertas
