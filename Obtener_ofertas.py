@@ -43,7 +43,7 @@ def __get_nivel_titulacion(txt, nivel_titulacion):
     if "doct" in txt.lower() and (nivel_titulacion > 6 or nivel_titulacion is 0):
         nivel_titulacion = 6
     if "licenciado" in txt.lower() or "máster" in txt.lower() \
-            or ("enxeñeiro" in txt.lower() and "técnico" not in txt.lower()) \
+            or (("enxeñeiro" in txt.lower() or "ingeniero") and "técnico" not in txt.lower()) \
             and (nivel_titulacion > 5 or nivel_titulacion is 0):
         nivel_titulacion = 5
     if "diplomado" in txt.lower() or "grao" in txt.lower() \
@@ -51,7 +51,7 @@ def __get_nivel_titulacion(txt, nivel_titulacion):
         nivel_titulacion = 4
     if "ciclo" in txt.lower() and (nivel_titulacion > 3 or nivel_titulacion is 0):
         nivel_titulacion = 3
-    if "bacharelato" in txt.lower() and (nivel_titulacion > 2 or nivel_titulacion is 0):
+    if ("bacharelato" in txt.lower() or "bachiller" in txt.lower()) and (nivel_titulacion > 2 or nivel_titulacion is 0):
         nivel_titulacion = 2
     if "secundaria" in txt.lower() and (nivel_titulacion > 1 or nivel_titulacion is 0):
         nivel_titulacion = 1
