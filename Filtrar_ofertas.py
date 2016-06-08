@@ -4,7 +4,7 @@ from pymongo import *
 import re
 import Levenshtein
 
-mongoClient = MongoClient('52.208.8.144', 27017)
+mongoClient = MongoClient('52.208.8.144', 8080)
 
 def get_ofertas(users):
     ofertas = __filtra_ofertas(users)
@@ -115,26 +115,19 @@ def __comprueba_exp_minima(users, oferta):
         return True
 
 def __comprueba_requisitos(users, offers):
+    for requisito in offers.get("imprescindible"):
+        if requisito not in users.get("habilidades"):
+            return False
+        elif users.get("habilidades")[requisito] == 0:
+            return False
     return True
-
-
-#sería interesante primero filtrar por la titulación
-#luego filtrar por los requesitos mínimos
-def __comprueba_imprescindible(users, oferta):
-    nota = 0
-    if oferta.get("imprescindible") is not None:
-        imprescindible = oferta.get("imprescindible").lower()
-        for desarrollo in users.get("desarrollo"):
-            for key in desarrollo:
-                if key.lower() in imprescindible:
-                    nota += int(desarrollo[key])
-    return nota
 
 def __filtra_ofertas(users):
     ofertas = mongoClient.ofertas
     collection_offer = ofertas.ofertas
     cursor_offer = collection_offer.find()
     ofertas = []
+
     #primero compruebo desplazamiento
     for offers in cursor_offer:
         if __comprueba_desplazamiento(users, offers) is not None:
@@ -182,7 +175,4 @@ def __filtra_ofertas(users):
                 if __comprueba_requisitos(users, offers) is False:
                     ofertas.remove(offers)
     print 'se han quedado %i empresas después del tema de los requisitos' % (len(ofertas))
-    # if ofertas is not None:
-    #     for offers in ofertas:
-    #         offers['nota_user'] = __comprueba_imprescindible(users, offers)
     return ofertas
