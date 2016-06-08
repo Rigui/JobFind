@@ -1,5 +1,5 @@
 from lxml import etree
-import opBasicas
+import mongodb
 
 cont = 0
 col = mongodb.get_db("52.208.8.144", 8080, "ranking")
