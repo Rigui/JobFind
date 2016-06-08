@@ -11,26 +11,26 @@ def get_ofertas(users):
     return ofertas
 
 def __comprueba_desplazamiento(users, oferta):
-    if users.get("desplazamiento") == '0':
-        if oferta.get("ciudad") is not None:
+    if users.get("desplazamiento") == 0:
+        if (users.get("ciudad") is not None) and (oferta.get("ciudad") is not None):
             if users.get("ciudad").lower() in oferta.get("ciudad").lower():
                 return oferta
         else:
             return oferta
-    elif users.get("desplazamiento") == '1':
-        if oferta.get("provincia") is not None:
+    elif users.get("desplazamiento") == 1:
+        if (users.get("provincia") is not None) and (oferta.get("provincia") is not None):
             if users.get("provincia").lower() in oferta.get("provincia").lower():
                 return oferta
         else:
             return oferta
-    elif users.get("desplazamiento") == '2':
-        if oferta.get("comunidad") is not None:
+    elif users.get("desplazamiento") == 2:
+        if (users.get("comunidad") is not None) and (oferta.get("comunidad") is not None):
             if users.get("comunidad").lower() in oferta.get("comunidad").lower():
                 return oferta
         else:
             return oferta
-    elif users.get("desplazamiento") == '3':
-        if oferta.get("pais") is not None:
+    elif users.get("desplazamiento") == 3:
+        if (users.get("pais") is not None) and (oferta.get("pais") is not None):
             if users.get("pais").lower() in oferta.get("pais").lower():
                 return oferta
         else:
@@ -77,10 +77,18 @@ def __comprueba_idiomas(users, oferta, impres, find_idioma, idioma):
         return True
 
 def __comprueba_nivel_titulacion(users, oferta):
-    if (int(users.get("nivel_titulacion")) >= int(oferta.get("nivel_titulacion"))):
+    if users.get("nivel_titulacion") is not None:
+        if oferta.get("nivel_titulacion") is not None:
+            if (int(users.get("nivel_titulacion")) >= int(oferta.get("nivel_titulacion"))):
+                return True
+            else:
+                return False
         return True
-    else:
-        return False
+    elif oferta.get("nivel_titulacion") is not None:
+        if oferta.get("nivel_titulacion") == 0:
+            return True
+        else:
+            return False
 
 def __comprueba_titulacion(users, oferta):
     if users.get("estudios") is not None:
@@ -123,17 +131,18 @@ def __comprueba_requisitos(users, offers):
     return True
 
 def __filtra_ofertas(users):
-    ofertas = mongoClient.ofertas
-    collection_offer = ofertas.ofertas
+    oferta = mongoClient.ofertas
+    collection_offer = oferta.ofertas
     cursor_offer = collection_offer.find()
     ofertas = []
-
     #primero compruebo desplazamiento
+    print users.get("desplazamiento")
     for offers in cursor_offer:
         if __comprueba_desplazamiento(users, offers) is not None:
             ofertas.append(__comprueba_desplazamiento(users, offers))
     print 'se han encontrado %i empresas' %(len(ofertas))
     #segundo idiomas
+    print users.get("idiomas")
     if ofertas is not None:
         for offers in ofertas[:]:
             if __comprueba_idiomas(users, offers, "imprescindible", "ingl", 'ingles') is False:
@@ -150,12 +159,14 @@ def __filtra_ofertas(users):
                 ofertas.remove(offers)
     print 'se han quedado %i empresas después del tema de los idiomas' % (len(ofertas))
     #tercero nivel titulacion
+    print users.get("nivel_titulacion")
     if ofertas is not None:
         for offers in ofertas[:]:
             if __comprueba_nivel_titulacion(users, offers) is False:
                 ofertas.remove(offers)
     print 'se han quedado %i empresas después del tema del nivel de titulacion' % (len(ofertas))
     #cuarto titulacion
+    print users.get("titulacion")
     if ofertas is not None:
         for offers in ofertas[:]:
             if __comprueba_titulacion(users, offers) is False:
@@ -164,11 +175,12 @@ def __filtra_ofertas(users):
     #quinto exp mínima
     if ofertas is not None:
         for offers in ofertas[:]:
-            if offers.get("experiencia_min") is not None:
+            if not offers.get("experiencia_min"):
                 if __comprueba_exp_minima(users, offers) is False:
                     ofertas.remove(offers)
     print 'se han quedado %i empresas después del tema de la exp mínima' % (len(ofertas))
     #sexto compruebo requisitos mínimos
+    print users.get("habilidades")
     if ofertas is not None:
         for offers in ofertas[:]:
             if offers.get("imprescindible") is not None:
