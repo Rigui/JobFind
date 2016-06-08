@@ -91,31 +91,35 @@ def __scrapping_links(links, competencias_bd, imprescindible_bd):
                 if compet.split(" ").__len__() > 1:
                     compet_split = compet.split(" ")
                     split_len = len(compet_split)
-                    all_compet = True
                     if compet_split[0] in requisitos_prev:
-                        index = requisitos_prev.index(compet_split[0])
-                        for i in xrange(1, split_len):
-                            if compet_split[i] not in requisitos_prev[index + i]:
-                                all_compet = False
-                        if all_compet and compet not in competencias:
-                            competencias.append(compet)
+                        indexes = [n for (n, e) in enumerate(requisitos_prev) if e == compet_split[0]]
+                        for index in indexes:
+                            all_compet = True
+                            for i in xrange(1, split_len):
+                                if compet_split[i] not in requisitos_prev[index + i]:
+                                    all_compet = False
+                            if all_compet and compet not in competencias:
+                                competencias.append(compet)
                 elif compet in requisitos_prev and compet not in competencias:
                     competencias.append(compet)
+
             for impresc in imprescindible_bd:
                 if impresc.split(" ").__len__() > 1:
                     compet_split = impresc.split(" ")
                     split_len = len(compet_split)
-                    all_compet = False
                     if compet_split[0] in requisitos_prev:
-                        index = requisitos_prev.index(compet_split[0])
-                        all_compet = True
-                        for i in xrange(1, split_len):
-                            if compet_split[i] is not requisitos_prev[index + i]:
-                                all_compet = False
-                    if all_compet and impresc not in competencias:
-                        competencias.append(impresc)
-                elif impresc in requisitos_prev and impresc not in competencias:
-                    competencias.append(impresc)
+                        indexes = [n for (n, e) in enumerate(requisitos_prev) if e == compet_split[0]]
+                        for index in indexes:
+                            all_compet = True
+                            index = requisitos_prev.index(compet_split[0])
+                            all_compet = True
+                            for i in xrange(1, split_len):
+                                if compet_split[i] is not requisitos_prev[index + i]:
+                                    all_compet = False
+                            if all_compet and impresc not in imprescindible:
+                                imprescindible.append(impresc)
+                elif impresc in requisitos_prev and impresc not in imprescindible:
+                    imprescindible.append(impresc)
 
             # for req in requisitos_prev:
             #     if req in competencias_bd and req not in competencias:
