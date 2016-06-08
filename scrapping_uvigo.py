@@ -42,7 +42,7 @@ def __scrapping_links(links, competencias_bd, imprescindible_bd):
         status_code = req.status_code
         if status_code == 200:
             html = BeautifulSoup(req.text, "lxml")  # Pasamos el contenido HTML de la web a un objeto BeautifulSoup()
-            job_title = html.find('div', {'id': 'contido'}).find('h1').getText()
+            job_title = __tokenization_and_stemmer(html.find('div', {'id': 'contido'}).find('h1').getText().encode('utf-8'))
             city = fecha_inicio_publicacion = destinatarios = empresa = remuneracion = numero_vacantes = duracion = None
             requirese = conocimientos = funciones = None
             nivel_titulacion = 0
@@ -80,23 +80,54 @@ def __scrapping_links(links, competencias_bd, imprescindible_bd):
                     empresa = div.find_all('div')[1].getText()
 
             if funciones is not None and conocimientos is not None:
-                requisitos_prev = funciones + conocimientos
+                requisitos = funciones + conocimientos
             elif funciones is not None and conocimientos is None:
-                requisitos_prev = funciones
+                requisitos = funciones
             else:
-                requisitos_prev = conocimientos
-            requisitos_prev = [word for word in word_tokenize(requisitos_prev.lower().decode('utf-8'), 'portuguese')]
-            for req in requisitos_prev:
-                if req in competencias_bd and req not in competencias:
-                    competencias.append(req)
-                if req in imprescindible_bd and req not in imprescindible:
-                    imprescindible.append(req)
+                requisitos = conocimientos
+
+            requisitos_prev = [word for word in word_tokenize(requisitos.lower().decode('utf-8'), 'portuguese')]
+            for compet in competencias_bd:
+                if compet.split(" ").__len__() > 1:
+                    compet_split = compet.split(" ")
+                    split_len = len(compet_split)
+                    all_compet = True
+                    if compet_split[0] in requisitos_prev:
+                        index = requisitos_prev.index(compet_split[0])
+                        for i in xrange(1, split_len):
+                            if compet_split[i] not in requisitos_prev[index + i]:
+                                all_compet = False
+                        if all_compet and compet not in competencias:
+                            competencias.append(compet)
+                elif compet in requisitos_prev and compet not in competencias:
+                    competencias.append(compet)
+            for impresc in imprescindible_bd:
+                if impresc.split(" ").__len__() > 1:
+                    compet_split = impresc.split(" ")
+                    split_len = len(compet_split)
+                    all_compet = False
+                    if compet_split[0] in requisitos_prev:
+                        index = requisitos_prev.index(compet_split[0])
+                        all_compet = True
+                        for i in xrange(1, split_len):
+                            if compet_split[i] is not requisitos_prev[index + i]:
+                                all_compet = False
+                    if all_compet and impresc not in competencias:
+                        competencias.append(impresc)
+                elif impresc in requisitos_prev and impresc not in competencias:
+                    competencias.append(impresc)
+
+            # for req in requisitos_prev:
+            #     if req in competencias_bd and req not in competencias:
+            #         competencias.append(req)
+            #     if req in imprescindible_bd and req not in imprescindible:
+            #         imprescindible.append(req)
 
             oferta = oferta_class.Oferta(url, city, job_title, fecha_inicio_publicacion, empresa)
             oferta.salario_min = remuneracion
             oferta.numero_vacantes = numero_vacantes
             oferta.titulacion = destinatarios
-            oferta.requisitos = requisitos_prev
+            oferta.requisitos = requisitos
             oferta.imprescindible = imprescindible
             oferta.competencias = competencias
             oferta.requirese = requirese
