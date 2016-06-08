@@ -2,8 +2,13 @@ def generarExperiencia(col, doc):
     imprescindible = doc['imprescindible']
     competencias = doc['competencias']
 
-    nivXP = (0.2 * 1 / doc['nivel_titulacion'] + 0.8 * (0.75 * valoracionRequisitos(len(imprescindible))) +
-             0.25 * valoracionRequisitos(len(competencias)))
+    nivTit = doc['nivel_titulacion']
+    if nivTit == 0:
+        nivXP = (0.8 * (0.75 * valoracionRequisitos(len(imprescindible))) +
+                 0.25 * valoracionRequisitos(len(competencias)))
+    else:
+        nivXP = (0.2 * 1 / nivTit + 0.8 * (0.75 * valoracionRequisitos(len(imprescindible))) +
+                 0.25 * valoracionRequisitos(len(competencias)))
     xp = int(nivXP * 10)
     doc["experiencia_min"] = xp
     col.save(doc)
