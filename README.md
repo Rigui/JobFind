@@ -7,5 +7,5 @@ Librerrías necesarias:
 - requests
 - nltk
 - geopy
-- pylinkedin-0.3 (descargar de google, e instalar a mano)
+- pylinkedin-0.3 (https://code.google.com/archive/p/pylinkedin/)
 
