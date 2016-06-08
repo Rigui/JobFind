@@ -44,7 +44,8 @@ def get_infojobs(competencias_bd, imprescindible_bd):
             requirement_min = offer["requirementMin"].encode('utf-8')
             # requirements = [line for line in requirement_min.split("\n")]
             requisitos_prev = [word for word in word_tokenize(requirement_min.lower().decode('utf-8'), 'spanish')]
-            competencias = imprescindible = []
+            competencias = []
+            imprescindible = []
             # for req in requisitos_prev:
             #     if req in competencias_bd and req not in competencias:
             #         competencias.append(req)
@@ -71,7 +72,6 @@ def get_infojobs(competencias_bd, imprescindible_bd):
                 if impresc.split(" ").__len__() > 1:
                     compet_split = impresc.split(" ")
                     split_len = len(compet_split)
-                    all_compet = False
                     if compet_split[0] in requisitos_prev:
                         indexes = [n for (n, e) in enumerate(requisitos_prev) if e == compet_split[0]]
                         for index in indexes:
