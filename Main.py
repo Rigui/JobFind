@@ -5,6 +5,7 @@ import os
 import Localidades_update
 import Obtener_ofertas
 import linkedin_api
+from enriquecimiento import enriquecimiento
 
 
 def menu():
@@ -27,24 +28,24 @@ while True:
     opcionMenu = raw_input("inserta un numero valor >> ")
 
     if opcionMenu == "1":
-        print ""
         print "Has pulsado la opción 1...\nGenerando Base Datos ofertas"
         Obtener_ofertas.obtener_ofertas()
         Localidades_update.actualizar_localizacion_ofertas()
-        #TODO lo que falte para que se generen completas
+        enriquecimiento()
     elif opcionMenu == "2":
-        print ""
         print "Has pulsado la opción 2...\n"
-        linkedin=raw_input("¿Dispone de cuenta en linkedin? (s/n): ")
+        linkedin = raw_input("¿Dispone de cuenta en linkedin? (s/n): ")
         if linkedin in 's':
             linkedin_api.get_linkedin_info()
         Localidades_update.actualizar_localizacion_usuarios()
-        #Todo pedir todos los datos
     elif opcionMenu == "3":
         print ""
-        raw_input("Has pulsado la opción 3...\nBuscando ofertas que coincidan con tu perfil")
-        #TODO busqueda
+        print("Has pulsado la opción 3...\n")
+        email = raw_input("Introduzca su email")
+        print "Buscando ofertas que coincidan con tu perfil"
+        # TODO busqueda
     elif opcionMenu == "9":
+        print "Gracias"
         break
     else:
         print ""
