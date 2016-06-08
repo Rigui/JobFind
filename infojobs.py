@@ -3,6 +3,7 @@ import requests
 import oferta_class
 from nltk.stem.porter import *
 from nltk.tokenize import *
+import Obtener_ofertas
 
 
 def __tokenization_and_stemmer(line):
@@ -10,7 +11,7 @@ def __tokenization_and_stemmer(line):
     return tokenized_words
 
 
-def get_infojobs():
+def get_infojobs(competencias_bd, imprescindible_bd):
 
     req = requests.get('https://api.infojobs.net/api/1/offer',
                        auth=('2fe25988a01f48c59b36425abd6329b8', 'DHn5nyC8m1ByxAT1tnJUHjmwr4oZuYV82vVKlXqOKdCh6h4E05'))
@@ -27,7 +28,7 @@ def get_infojobs():
             job_title = __tokenization_and_stemmer(offer["title"].encode('utf-8'))
             titulacion = offer["study"]["value"].encode('utf-8')
             nivel_titulacion = 0
-            nivel_titulacion = __get_nivel_titulacion(str(titulacion), nivel_titulacion)
+            nivel_titulacion = Obtener_ofertas.__get_nivel_titulacion(str(titulacion), nivel_titulacion)
             titulacion = __tokenization_and_stemmer(titulacion)
             author_name = offer["author"]["name"]
             author_uri = __tokenization_and_stemmer(offer["author"]["uri"].encode('utf-8'))
@@ -40,8 +41,15 @@ def get_infojobs():
             urgent = offer["urgent"]
             work_day = __tokenization_and_stemmer(offer["workDay"]["value"].encode('utf-8'))
             salary_period = __tokenization_and_stemmer(offer["salaryPeriod"]["value"].encode('utf-8'))
-            requirement_min = __tokenization_and_stemmer(offer["requirementMin"].encode('utf-8'))
+            requirement_min = offer["requirementMin"].encode('utf-8')
             # requirements = [line for line in requirement_min.split("\n")]
+            requisitos_prev = [word for word in word_tokenize(requirement_min.lower().decode('utf-8'), 'spanish')]
+            competencias = imprescindible = []
+            for req in requisitos_prev:
+                if req in competencias_bd and req not in competencias:
+                    competencias.append(req)
+                if req in imprescindible_bd and req not in imprescindible:
+                    imprescindible.append(req)
 
             oferta = oferta_class.Oferta(link, city, job_title, published_date, author_name)
             oferta.nivel_titulacion = nivel_titulacion
@@ -51,25 +59,9 @@ def get_infojobs():
             oferta.provincia = province
             oferta.requisitos = requirement_min
             oferta.experiencia_min = experience
+            oferta.imprescindible = imprescindible
+            oferta.competencias = competencias
             ofertas.append(oferta.to_json())
 
         return ofertas
 
-
-def __get_nivel_titulacion(txt, nivel_titulacion):
-    if "doct" in txt.lower() and (nivel_titulacion > 6 or nivel_titulacion is 0):
-        nivel_titulacion = 6
-    if "licenciado" in txt.lower() or "máster" in txt.lower() \
-            or ("enxeñeiro" in txt.lower() and "técnico" not in txt.lower()) \
-            and (nivel_titulacion > 5 or nivel_titulacion is 0):
-        nivel_titulacion = 5
-    if "diplomado" in txt.lower() or "grao" in txt.lower() \
-            or "enxeñeiro técnico" in txt.lower() and (nivel_titulacion > 4 or nivel_titulacion is 0):
-        nivel_titulacion = 4
-    if "ciclo" in txt.lower() and (nivel_titulacion > 3 or nivel_titulacion is 0):
-        nivel_titulacion = 3
-    if "bacharelato" in txt.lower() and (nivel_titulacion > 2 or nivel_titulacion is 0):
-        nivel_titulacion = 2
-    if "secundaria" in txt.lower() and (nivel_titulacion > 1 or nivel_titulacion is 0):
-        nivel_titulacion = 1
-    return nivel_titulacion
