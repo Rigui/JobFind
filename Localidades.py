@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
-from geopy.geocoders import Nominatim
-from geopy.geocoders import GeoNames
 from geopy.distance import vincenty
+from geopy.geocoders import GeoNames
+from geopy.geocoders import Nominatim
 
 geolocator = Nominatim()
 geonames = GeoNames(username="demo")
+
 
 def calculo_distancia_ciudades(ciudad_usuario, ciudad_oferta):
     location_user = get_location_ciudad(ciudad_usuario)
@@ -13,10 +14,11 @@ def calculo_distancia_ciudades(ciudad_usuario, ciudad_oferta):
     oferta_cordenadas = (location_oferta.latitude, location_oferta.longitude)
     return vincenty(usuario_cordenadas, oferta_cordenadas).kilometers
 
+
 def get_provincia(ciudad):
     localizacion = get_ciudad_completa(ciudad)
     if localizacion is None:
-        provincia= None
+        provincia = None
     else:
         localizacion = localizacion.split(",")
         longitud = localizacion.__len__()
@@ -27,6 +29,7 @@ def get_provincia(ciudad):
         else:
             provincia = localizacion[0]
     return provincia
+
 
 def get_comunidad(ciudad):
     localizacion = get_ciudad_completa(ciudad)
@@ -43,6 +46,7 @@ def get_comunidad(ciudad):
             comunidad = localizacion[1]
     return comunidad
 
+
 def get_pais(ciudad):
     localizacion = get_ciudad_completa(ciudad)
     if localizacion is None:
@@ -58,11 +62,13 @@ def get_pais(ciudad):
             pais = localizacion[2]
     return pais
 
+
 def get_ciudad_completa(ciudad):
     location = get_location_ciudad(ciudad)
     if location is None:
         return None
     return location.address.lower()
+
 
 def get_location_ciudad(ciudad):
     cordenadas = geonames.geocode(ciudad)
@@ -74,19 +80,3 @@ def get_location_ciudad(ciudad):
     else:
         return None
     return location
-
-
-
-def main():
-    print(get_provincia({'city':"A Coruña"}))
-    print(get_comunidad({'city':"A Coruña"}))
-    print(get_pais({'city':"A Coruña"}))
-    print(get_ciudad_completa("galicia"))
-    print(calculo_distancia_ciudades("Vigo","pontevedra"))
-    return
-
-if __name__ == "__main__":
-    main()
-
-
-
