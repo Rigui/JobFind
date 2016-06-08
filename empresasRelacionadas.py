@@ -24,7 +24,7 @@ def relacionadas(colOfer, colTit):
                 if p['empresa'] != oferta['empresa']:
                     relac.add(p['empresa'])
 
-        oferta["empresasRelacionadas"] = list(relac)
+        oferta["empresas_relacionadas"] = list(relac)
 
         colOfer.save(oferta)
 
