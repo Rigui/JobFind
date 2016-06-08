@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from geopy.distance import vincenty
+from geopy.exc import GeocoderServiceError
 from geopy.geocoders import GeoNames
 from geopy.geocoders import Nominatim
 
@@ -71,12 +72,15 @@ def get_ciudad_completa(ciudad):
 
 
 def get_location_ciudad(ciudad):
-    cordenadas = geonames.geocode(ciudad)
-    if cordenadas is not None:
-        ciudad_correcta = cordenadas.address.split(",")[0]
-        location = geolocator.geocode(ciudad_correcta)
-        if location is None:
-            return None
-    else:
+    try:
+        cordenadas = geonames.geocode(ciudad)
+        if cordenadas is not None:
+            ciudad_correcta = cordenadas.address.split(",")[0]
+        else:
+            ciudad_correcta =ciudad
+    except GeocoderServiceError:
+        ciudad_correcta = ciudad
+    location = geolocator.geocode(ciudad_correcta)
+    if location is None:
         return None
     return location
